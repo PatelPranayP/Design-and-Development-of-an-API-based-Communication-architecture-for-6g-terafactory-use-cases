@@ -1,0 +1,92 @@
+THINGS TO UPDATE FOR REAL ROBOT TESTING
+1. MQTT Subscriber (on robot side)
+
+The robot runs the mqtt_websocket_subscriber.py file.
+
+🔁 What to change:
+
+Update MQTT_BROKER from "localhost" to your laptop's IP address, since MQTT broker is running on your laptop.
+
+MQTT_BROKER = "192.168.1.X"  # Your laptop IP (static if possible)
+
+
+Tip: Get your laptop’s IP using:
+
+ipconfig (on Windows)
+ifconfig (on Linux/Mac)
+
+2. WebSocket (on robot side)
+
+Your robot likely runs a ROSBridge WebSocket server, which listens on port 9090.
+
+Ensure:
+
+ROSBridge is running on robot
+
+The IP is accessible from your laptop
+
+In mqtt_websocket_subscriber.py, update:
+
+ROSBRIDGE_WS_URL = "ws://<robot-ip>:9090"
+
+
+Example:
+
+ROSBRIDGE_WS_URL = "ws://192.168.1.50:9090"
+
+3. Topics & Message Formats
+
+Make sure that your robot is:
+
+Subscribed to these topics:
+
+/cmd_vel
+
+/robot/task_id
+
+/robot/fault_type
+
+/robot/target_location
+
+/robot/movement_duration
+
+Accepting data in JSON (which is how MQTT/WebSocket forwards it)
+
+🛠 If not, you'll need a converter node on the robot to parse incoming JSON and publish to the correct ROS 2 topics.
+
+4. Dashboard (on laptop)
+
+No major changes, just:
+
+Ensure MQTT backend still points to "localhost" (since MQTT broker runs on your laptop).
+
+Make sure your firewall allows connections to port 1883.
+
+TESTING FLOW IN REAL SETUP
+
+Run MQTT broker (on your laptop):
+
+mosquitto
+
+
+Run MQTT dashboard backend:
+
+uvicorn mqtt_backend_match_subscriber:app --reload
+
+
+Run frontend:
+
+npm start
+
+
+Run mqtt_websocket_subscriber.py on robot
+
+Use dashboard to send a task — robot should receive it and start moving!
+
+BONUS: Add Feedback from Robot (optional)
+
+If your robot publishes updates to:
+
+/robot/status or /robot/feedback
+
+You can write a small MQTT → Dashboard hook to subscribe and display robot's live status back on UI.
